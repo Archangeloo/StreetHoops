@@ -1,0 +1,35 @@
+{
+  "name": "street-hoops",
+  "version": "0.2.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "local": "node scripts/start-local.mjs",
+    "local:prepare": "node scripts/start-local.mjs --prepare",
+    "dev": "concurrently -k -n API,WEB -c cyan,magenta \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev --workspace backend",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:generate": "npm run db:generate --workspace backend",
+    "db:migrate": "npm run db:migrate --workspace backend",
+    "db:deploy": "npm run db:deploy --workspace backend",
+    "db:seed": "npm run db:seed --workspace backend",
+    "db:studio": "npm run db:studio --workspace backend",
+    "test": "npm run test --workspace backend && npm run test --workspace frontend",
+    "build": "npm run build --workspace frontend",
+    "setup": "node scripts/setup-local.mjs",
+    "test:integration": "node scripts/test-integration.mjs",
+    "moderator": "node scripts/set-moderator.mjs",
+    "package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-source.ps1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

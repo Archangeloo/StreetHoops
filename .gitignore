@@ -1,0 +1,26 @@
+# Segredos (inclusive em subpastas)
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Dependências, builds e logs
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+coverage/
+*.log
+npm-debug.log*
+.DS_Store
+*.local
+
+# Arquivos locais do Prisma / IDE
+backend/prisma/*.db
+backend/prisma/*.db-journal
+.vscode/
+.idea/
+backend/uploads/
+artifacts/

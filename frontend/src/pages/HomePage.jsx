@@ -1,0 +1,17 @@
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { useResource } from '../hooks/useResource.js';
+import { Avatar, CourtCard, EmptyState, ResourceState, matchLabels, modalityLabels } from '../components/DataView.jsx';
+
+export function HomePage() {
+  const { user } = useAuth();
+  const profile = useResource('/perfil', 2000);
+  const courts = useResource('/quadras', 2000);
+  const matches = useResource('/partidas', 2000);
+  const player = profile.data?.jogador || user;
+  const stats = player.estatistica || {};
+  const checkin = courts.data?.checkin;
+  const active = (matches.data?.partidas || []).filter((match) => !['CONCLUIDA', 'CANCELADA'].includes(match.status));
+  const busyCourts = (courts.data?.quadras || []).filter((court) => court.pessoas > 0);
+  return <section className="dashboard-page" aria-labelledby="dashboard-title"><div className="dash-greeting"><div><span className="eyebrow">BORA JOGAR?</span><h1 id="dashboard-title">SALVE, <em>{user.nome.split(' ')[0]}!</em></h1></div><Avatar jogador={player} /></div><ResourceState resource={profile}><div className="score-card"><div className="score-head"><span>SEU DESEMPENHO</span><span>🏀 STREET HOOPS</span></div><div className="score-grid"><div><strong>{stats.vitorias ?? 0}</strong><small>VITÓRIAS</small></div><div><strong>{1 + Math.floor((stats.xp || 0) / 100)}</strong><small>NÍVEL</small></div><div><strong>{stats.elo ?? 1000}</strong><small>ELO</small></div></div><div className="progress-label"><span>PROGRESSO DO NÍVEL</span><span>{(stats.xp || 0) % 100} / 100 XP</span></div><div className="progress-bar"><span style={{ width: `${(stats.xp || 0) % 100}%` }} /></div></div></ResourceState><div className="play-panel"><span className="eyebrow">PRONTO PARA A PRÓXIMA?</span><h2>ENCONTRE SUA<br />PRÓXIMA PARTIDA</h2><p>{checkin ? `Seu check-in está ativo em ${checkin.quadra?.nome}. Vamos jogar?` : 'Escolha uma quadra e faça check-in antes de procurar adversários.'}</p><Link to={checkin ? '/partidas/nova' : '/quadras'} className="button button--primary button--pulse">ENCONTRAR PARTIDA →</Link></div><div className="section-heading"><h2>PARTIDAS NA QUADRA</h2></div><ResourceState resource={matches}><div className="stack">{!active.length && <EmptyState title="O próximo jogo pode ser seu" to={checkin ? '/partidas/nova' : '/quadras'} action={checkin ? 'Criar uma partida' : 'Fazer check-in'}>{checkin ? 'Nenhuma partida aberta ou em andamento para você nesta quadra.' : 'Faça check-in para ver as partidas da sua quadra.'}</EmptyState>}{active.map((match) => <Link className="info-card match-list-card" key={match.id} to={match.status === 'AGUARDANDO_CONFIRMACAO' ? `/partidas/${match.id}/resumo` : `/partidas/${match.id}`}><span className="eyebrow">{matchLabels[match.status]}</span><h2>{modalityLabels[match.modalidade] || match.modalidade} · {match.quadra?.nome}</h2><small>{match.pontuacao} pontos · {match.estilo === 'RACHAO' ? 'Rachão' : 'FIBA'}</small></Link>)}</div></ResourceState><div className="section-heading"><h2>ONDE ESTÁ ROLANDO</h2><Link to="/quadras">VER TODAS →</Link></div><ResourceState resource={courts}><div className="stack">{!busyCourts.length && <EmptyState title="As quadras estão esperando" to="/quadras" action="Explorar quadras">Ninguém fez check-in por enquanto. Chame sua galera para jogar.</EmptyState>}{busyCourts.slice(0, 5).map((court) => <CourtCard key={court.id} quadra={court} />)}</div></ResourceState></section>;
+}
